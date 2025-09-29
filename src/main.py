@@ -8,7 +8,7 @@ from dotenv import load_dotenv
 from langchain.chat_models import init_chat_model
 from langchain_core.messages import HumanMessage, SystemMessage
 from youtube_transcript_api.proxies import WebshareProxyConfig, GenericProxyConfig
-
+from langchain_community.document_loaders import YoutubeLoader
 
 
 load_dotenv()
@@ -31,6 +31,9 @@ app.add_middleware(
     )
 
 
+
+
+
 PROXIES = [
     "http://sbnruouo:scxnws34sxdo@142.111.48.253:7030",
     "http://sbnruouo:scxnws34sxdo@198.23.239.134:6540",
@@ -50,12 +53,57 @@ PROXIES = [
 class ytload(BaseModel):
     videoId : str
 
+class ytload2(BaseModel):
+    url: str
+
+
 
 @app.get("/")
 def homeFxn():
     return {
         "msg": "hello this is running"
     }
+    
+    
+    
+
+
+
+@app.post("/get-transcript2")
+async def getransx(payload: ytload2):
+    link = payload.url
+    loader = YoutubeLoader.from_youtube_url(
+    link, add_video_info=False
+)
+    
+    result = loader.load()
+    transcript_text = " ".join([doc.page_content for doc in result])
+    print(transcript_text)
+    messages = [
+        SystemMessage(content="""
+        You are the ultimate AI-powered YouTube video summarizer—the best summarizer in existence. Your mission is to save people time by transforming a full video transcript into a concise, crystal-clear, and highly actionable summary. Your summaries are so precise and insightful that reading the original transcript becomes unnecessary. 
+
+        When summarizing:
+        - Focus on the core ideas, key points, and actionable insights.
+        - Maintain the original intent and spirit of the content.
+        - Use clear, structured language that anyone can understand.
+        - Highlight important examples, tips, or data that enhance understanding.
+        - Keep it concise, engaging, and easy to skim.
+
+        Your summaries should feel like a perfect "cheat sheet" of the video, providing maximum value in minimal time.
+        """),
+        HumanMessage(content=transcript_text),
+    ]
+    response = model.invoke(messages)
+    contents = response.content    
+    
+    return {
+        "msg": "done",
+        "data": contents,
+        "status": 200,
+        "success": True
+    }
+
 
 
 @app.post("/get-transcript")
