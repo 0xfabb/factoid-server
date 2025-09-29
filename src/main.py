@@ -7,6 +7,7 @@ import os
 from dotenv import load_dotenv
 from langchain.chat_models import init_chat_model
 from langchain_core.messages import HumanMessage, SystemMessage
+from youtube_transcript_api.proxies import WebshareProxyConfig, GenericProxyConfig
 
 
 
@@ -30,6 +31,22 @@ app.add_middleware(
     )
 
 
+PROXIES = [
+    "http://sbnruouo:scxnws34sxdo@142.111.48.253:7030",
+    "http://sbnruouo:scxnws34sxdo@198.23.239.134:6540",
+    "http://sbnruouo:scxnws34sxdo@45.38.107.97:6014",
+    "http://sbnruouo:scxnws34sxdo@107.172.163.27:6543",
+    "http://sbnruouo:scxnws34sxdo@64.137.96.74:6641",
+    "http://sbnruouo:scxnws34sxdo@154.203.43.247:5536",
+    "http://sbnruouo:scxnws34sxdo@84.247.60.125:6095",
+    "http://sbnruouo:scxnws34sxdo@216.10.27.159:6837",
+    "http://sbnruouo:scxnws34sxdo@142.111.67.146:5611",
+    "http://sbnruouo:scxnws34sxdo@142.147.128.93:6593",
+]
+
+
+
+
 class ytload(BaseModel):
     videoId : str
 
@@ -44,7 +61,12 @@ def homeFxn():
 @app.post("/get-transcript")
 async def transfxn(payload: ytload):
     videoId = payload.videoId
-    ytt_api = YouTubeTranscriptApi()
+    ytt_api = YouTubeTranscriptApi(
+    proxy_config=GenericProxyConfig(
+       http_url="http://sbnruouo:scxnws34sxdo@142.147.128.93:6593",
+    )
+)
+
     
     transcript = ytt_api.fetch(videoId)
     
